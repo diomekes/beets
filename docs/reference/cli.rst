@@ -259,7 +259,7 @@ move
 ````
 ::
 
-    beet move [-capt] [-d DIR] QUERY
+    beet move [-ceapt] [-d DIR] QUERY
 
 Move or copy items in your library.
 
@@ -267,7 +267,8 @@ This command, by default, acts as a library consolidator: items matching the
 query are renamed into your library directory structure. By specifying a
 destination directory with ``-d`` manually, you can move items matching a query
 anywhere in your filesystem. The ``-c`` option copies files instead of moving
-them. As with other commands, the ``-a`` option matches albums instead of items.
+them. The ``-e`` copies (exports) files without updating the database. As with
+other commands, the ``-a`` option matches albums instead of items.
 
 To perform a "dry run", just use the ``-p`` (for "pretend") flag. This will
 show you a list of files that would be moved but won't actually change anything

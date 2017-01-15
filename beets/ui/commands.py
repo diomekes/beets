@@ -1443,7 +1443,7 @@ default_commands.append(modify_cmd)
 
 # move: Move/copy files to the library or a new base directory.
 
-def move_items(lib, dest, query, copy, album, pretend, confirm=False):
+def move_items(lib, dest, query, copy, export, album, pretend, confirm=False):
     """Moves or copies items to a new base directory, given by dest. If
     dest is None, then the library's base directory is used, making the
     command "consolidate" files.
@@ -1456,8 +1456,8 @@ def move_items(lib, dest, query, copy, album, pretend, confirm=False):
     isalbummoved = lambda album: any(isitemmoved(i) for i in album.items())
     objs = [o for o in objs if (isalbummoved if album else isitemmoved)(o)]
 
-    action = u'Copying' if copy else u'Moving'
-    act = u'copy' if copy else u'move'
+    action = u'Copying' if copy else u'Exporting' if export else u'Moving'
+    act = u'copy' if copy else u'export' if export else u'move'
     entity = u'album' if album else u'item'
     log.info(u'{0} {1} {2}{3}.', action, len(objs), entity,
              u's' if len(objs) != 1 else u'')
@@ -1481,8 +1481,12 @@ def move_items(lib, dest, query, copy, album, pretend, confirm=False):
         for obj in objs:
             log.debug(u'moving: {0}', util.displayable_path(obj.path))
 
-            obj.move(copy, basedir=dest)
-            obj.store()
+            if export:
+                obj.move(copy=True, basedir=dest, store=False)
+
+            else:
+                obj.move(copy, basedir=dest)
+                obj.store()
 
 
 def move_func(lib, opts, args):
@@ -1492,8 +1496,8 @@ def move_func(lib, opts, args):
         if not os.path.isdir(dest):
             raise ui.UserError(u'no such directory: %s' % dest)
 
-    move_items(lib, dest, decargs(args), opts.copy, opts.album, opts.pretend,
-               opts.timid)
+    move_items(lib, dest, decargs(args), opts.copy, opts.export, opts.album,
+               opts.pretend, opts.timid)
 
 
 move_cmd = ui.Subcommand(
@@ -1506,6 +1510,10 @@ move_cmd.parser.add_option(
 move_cmd.parser.add_option(
     u'-c', u'--copy', default=False, action='store_true',
     help=u'copy instead of moving'
+)
+move_cmd.parser.add_option(
+    u'-e', u'--export', default=False, action='store_true',
+    help=u'copy without updating database'
 )
 move_cmd.parser.add_option(
     u'-p', u'--pretend', default=False, action='store_true',
